@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>破式纠偏 · 小数读法</title>
+  <style>
+    :root{--bg:#0b0f19;--card:rgba(255,255,255,.04);--line:rgba(255,255,255,.14);--text:#e8eefc;--muted:rgba(232,238,252,.75);
+      --ok:rgba(62,210,130,.18);--okLine:rgba(62,210,130,.35);--bad:rgba(255,90,107,.16);--badLine:rgba(255,90,107,.32);
+      --btnGhost:rgba(255,255,255,.08);--btnGhostLine:rgba(255,255,255,.18);--btnPrimary:rgba(255,255,255,.88);--btnPrimaryText:#0b0f19;}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+    .wrap{max-width:980px;margin:0 auto;padding:18px;display:grid;gap:14px}
+    .card{border:1px solid var(--line);border-radius:18px;background:var(--card);padding:18px}
+    .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .pill{font-size:12px;opacity:.9;border:1px solid var(--line);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.03)}
+    h1{margin:8px 0 6px;font-size:26px}
+    .sub{margin:0 0 10px;color:var(--muted);line-height:1.6}
+    .q{margin:10px 0 6px;font-size:18px;font-weight:900}
+    .opt{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);cursor:pointer;margin-top:10px}
+    .opt:hover{background:rgba(255,255,255,.05)}
+    .opt input{margin-top:3px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+    button{padding:12px 14px;border-radius:14px;border:1px solid var(--btnGhostLine);cursor:pointer;font-weight:900;background:var(--btnGhost);color:var(--text)}
+    button.primary{background:rgba(62,210,130,.18);border-color:rgba(62,210,130,.35)}
+    button:disabled{opacity:.45;cursor:not-allowed}
+    .panel{display:none;margin-top:14px;padding:14px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
+    .panel.ok{border-color:var(--okLine);background:linear-gradient(180deg,var(--ok),rgba(255,255,255,.03))}
+    .panel.bad{border-color:var(--badLine);background:linear-gradient(180deg,var(--bad),rgba(255,255,255,.03))}
+    .panelTitle{display:flex;gap:10px;align-items:center;font-weight:1000}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.ok{background:#3ed282;box-shadow:0 0 18px rgba(62,210,130,.45)}
+    .dot.bad{background:#ff5a6b;box-shadow:0 0 18px rgba(255,90,107,.35)}
+    .panel p{margin:8px 0 0;color:var(--muted);line-height:1.7}
+    .footerNav{display:flex;gap:14px;margin-top:14px}
+    .footerNav .btn{flex:1;padding:14px 16px;border-radius:14px;text-align:center;font-weight:1000;text-decoration:none;border:1px solid var(--btnGhostLine)}
+    .footerNav .ghost{background:var(--btnGhost);color:var(--text)}
+    .footerNav .primary{background:var(--btnPrimary);color:var(--btnPrimaryText);border-color:rgba(255,255,255,.10)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="top">
+        <div class="pill">修法版 · 破式纠偏</div>
+        <div class="pill">通过后：回到主线下一页</div>
+      </div>
+
+      <h1>破式纠偏 · 小数读法</h1>
+      <p class="sub">小数点后按“逐位读出”。</p>
+
+      <div class="q">35.35 的正确读法是：</div>
+
+      <form id="quiz">
+        <label class="opt"><input type="radio" name="q">A. 三十五点三十五</label>
+        <label class="opt"><input type="radio" name="q" id="right">B. 三十五点三五</label>
+        <label class="opt"><input type="radio" name="q">C. 三十五又三十五</label>
+      </form>
+
+      <div class="actions">
+        <button class="primary" type="button" id="btnCheck">结式确认</button>
+        <button type="button" id="btnReset">重置</button>
+      </div>
+
+      <div class="panel ok" id="okPanel">
+        <div class="panelTitle"><span class="dot ok"></span>结式已封</div>
+        <p>逐位读出：小数点后按数字顺序读（“三五”）。</p>
+        <div class="footerNav">
+          <a href="#" class="btn ghost back">返回主线</a>
+          <a href="#" class="btn primary go">继续推进</a>
+        </div>
+      </div>
+
+      <div class="panel bad" id="badPanel">
+        <div class="panelTitle"><span class="dot bad"></span>破式提示</div>
+        <p>小数部分不能当整数整体读，应逐位读出。</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const params=new URLSearchParams(location.search);
+  const nextPage=parseInt(params.get("next")||"1",10);
+  const returnUrl=`index.html#s=${isNaN(nextPage)?1:nextPage}`;
+  document.querySelector(".back").onclick=(e)=>{e.preventDefault();location.href=returnUrl;};
+  document.querySelector(".go").onclick=(e)=>{e.preventDefault();location.href=returnUrl;};
+
+  const btnCheck=document.getElementById("btnCheck"), btnReset=document.getElementById("btnReset");
+  const okPanel=document.getElementById("okPanel"), badPanel=document.getElementById("badPanel");
+  function lockAll(){document.querySelectorAll('input[name="q"]').forEach(i=>i.disabled=true);btnCheck.disabled=true;}
+  function unlockAll(){document.querySelectorAll('input[name="q"]').forEach(i=>{i.disabled=false;i.checked=false;});btnCheck.disabled=false;}
+  function show(p){p.style.display="block"} function hide(p){p.style.display="none"}
+  btnCheck.onclick=()=>{const picked=document.querySelector('input[name="q"]:checked');if(!picked){alert("请先选择一个选项。");return;}
+    const ok=document.getElementById("right").checked; hide(okPanel);hide(badPanel); show(ok?okPanel:badPanel); lockAll();};
+  btnReset.onclick=()=>{hide(okPanel);hide(badPanel);unlockAll();};
+</script>
+</body>
+</html>
